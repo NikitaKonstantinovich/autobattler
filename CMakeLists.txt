@@ -4,13 +4,19 @@ project(autobattler LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-option(ABUILD_TESTS "Build tests" OFF)
-
 add_library(ab_core
+    src/app/rng_mersenne.cpp
 )
-
 target_include_directories(ab_core PUBLIC include)
 target_compile_features(ab_core PUBLIC cxx_std_20)
 
-add_executable(ab_cli src/ui/cli/main.cpp)
+if(MSVC)
+  target_compile_options(ab_core PRIVATE /W4 /permissive-)
+else()
+  target_compile_options(ab_core PRIVATE -Wall -Wextra -Wpedantic)
+endif()
+
+add_executable(ab_cli
+    src/ui/cli/main.cpp
+)
 target_link_libraries(ab_cli PRIVATE ab_core)

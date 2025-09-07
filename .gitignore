@@ -1,0 +1,65 @@
+# === Build artifacts ===
+build/
+out/
+bin/
+lib/
+dist/
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+compile_commands.json
+Makefile
+build.ninja
+.ninja_deps
+.ninja_log
+
+# === Compiled objects ===
+*.o
+*.obj
+*.lo
+*.la
+*.a
+*.lib
+*.dll
+*.dylib
+*.so
+*.exp
+*.pdb
+*.ilk
+*.exe
+
+# === IDEs / Editors ===
+# Visual Studio / MSBuild
+*.vcxproj.user
+*.vcxproj.filters
+*.opensdf
+*.sdf
+*.ipch
+*.suo
+*.user
+*.VC.db
+.vs/
+
+# CLion / IntelliJ
+.idea/
+# JetBrains cmake output (already covered by cmake-build-*/)
+
+# VS Code
+.vscode/
+
+# Qt / QtCreator
+*.pro.user
+*.qbs.user
+*.qmlproject.user
+*.qmake.stash
+CMakeLists.txt.user
+.qt/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+*.tmp
+*.cache
