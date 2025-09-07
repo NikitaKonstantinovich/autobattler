@@ -5,6 +5,7 @@
 #include "ab/monster.hpp"
 #include "ab/combat.hpp"
 #include "ab/loot.hpp"
+#include "ab/level.hpp"
 #include <iostream>
 #include <iomanip>
 
@@ -30,14 +31,16 @@ static void printMonster(const ab::Monster& m) {
 }
 
 int main() {
-	setlocale(LC_ALL, "Russian");
+    setlocale(LC_ALL, "Russian");
     using namespace ab;
 
     IRng& rng = defaultRng();
 
     Character hero = Character::createNew(rng, ClassKind::Warrior);
-    hero.gainLevel(ClassKind::Rogue);
-    hero.gainLevel(ClassKind::Barbarian);
+    LevelSystem::grantLevel(hero, ClassKind::Rogue);
+    LevelSystem::grantLevel(hero, ClassKind::Barbarian);
+
+    LevelSystem::healFull(hero);
 
     std::cout << "=== Hero sheet ===\n";
     printSheet(hero);
@@ -48,7 +51,6 @@ int main() {
 
     Combatant A = makePlayer(hero);
     Combatant B = makeMonster(mon);
-
     CombatEngine engine(rng);
 
     bool playerTurn = (A.stats.dex >= B.stats.dex);
@@ -75,7 +77,6 @@ int main() {
         }
 
         if (def.curHP <= 0) break;
-
         playerTurn = !playerTurn;
         ++roundNo;
     }
@@ -90,6 +91,10 @@ int main() {
             std::cout << (equipped ? "Equipped: " : "Kept current: ")
                 << hero.weapon().name << " (+" << hero.weapon().baseDamage << ")\n";
         }
+        LevelSystem::levelUpUntilTotal(hero, 3, rng);
+        std::cout << "=== After level-ups to total 3 ===\n";
+        printSheet(hero);
     }
+
     return 0;
 }
