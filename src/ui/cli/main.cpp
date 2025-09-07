@@ -3,6 +3,7 @@
 #include "ab/character.hpp"
 #include "ab/classes.hpp"
 #include "ab/monster.hpp"
+#include "ab/combat.hpp"
 #include <iostream>
 
 static void printSheet(const ab::Character& c) {
@@ -34,17 +35,15 @@ int main() {
     std::cout << "Created hero as " << ab::className(ab::ClassKind::Warrior) << "\n";
 	printSheet(hero);
 
-	hero.gainLevel(ab::ClassKind::Rogue);
-    std::cout << "After level-up to " << ab::className(ab::ClassKind::Rogue) << "\n";
-    printSheet(hero);
-
-    hero.takeDamage(3);
-    printSheet(hero);
-    hero.healFull();
-    printSheet(hero);
-
 	ab::Monster m = ab::randomMonster(rng);
 	printMonster(m);
+
+    ab::Combatant A = ab::makePlayer(hero);
+    ab::Combatant B = ab::makeMonster(m);
+    ab::CombatEngine engine(rng);
+    bool win = engine.duel(A, B);
+    std::cout << (win ? "Result: WIN\n" : "Result: LOSS\n");
+
 
     return 0;
 }

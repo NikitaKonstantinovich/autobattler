@@ -6,7 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(ab_core
     src/app/rng_mersenne.cpp
- "src/app/character.cpp" "src/app/monster.cpp")
+ "src/app/character.cpp" "src/app/monster.cpp" "src/app/combat.cpp")
 target_include_directories(ab_core PUBLIC include)
 target_compile_features(ab_core PUBLIC cxx_std_20)
 
@@ -18,5 +18,5 @@ endif()
 
 add_executable(ab_cli
     src/ui/cli/main.cpp
- "src/app/character.cpp" "src/app/monster.cpp")
+ "src/app/character.cpp" "src/app/monster.cpp" "src/app/combat.cpp")
 target_link_libraries(ab_cli PRIVATE ab_core)
