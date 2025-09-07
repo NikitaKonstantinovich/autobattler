@@ -5,6 +5,7 @@
 #include "ab/monster.hpp"
 #include "ab/combat.hpp"
 #include <iostream>
+#include <iomanip>
 
 static void printSheet(const ab::Character& c) {
     std::cout << "HP " << c.curHp() << "/" << c.maxHp()
@@ -29,21 +30,56 @@ static void printMonster(const ab::Monster& m) {
 
 int main() {
 	setlocale(LC_ALL, "Russian");
-    ab::IRng& rng = ab::defaultRng();
+    using namespace ab;
 
-	ab::Character hero = ab::Character::createNew(rng, ab::ClassKind::Warrior);
-    std::cout << "Created hero as " << ab::className(ab::ClassKind::Warrior) << "\n";
-	printSheet(hero);
+    IRng& rng = defaultRng();
 
-	ab::Monster m = ab::randomMonster(rng);
-	printMonster(m);
+    Character hero = Character::createNew(rng, ClassKind::Warrior);
+    hero.gainLevel(ClassKind::Rogue);
+    hero.gainLevel(ClassKind::Barbarian);
 
-    ab::Combatant A = ab::makePlayer(hero);
-    ab::Combatant B = ab::makeMonster(m);
-    ab::CombatEngine engine(rng);
-    bool win = engine.duel(A, B);
-    std::cout << (win ? "Result: WIN\n" : "Result: LOSS\n");
+    std::cout << "=== Hero sheet ===\n";
+    printSheet(hero);
 
+    Monster mon = randomMonster(rng);
+    std::cout << "=== Monster spawned ===\n";
+    printMonster(mon);
 
+    Combatant A = makePlayer(hero);
+    Combatant B = makeMonster(mon);
+
+    CombatEngine engine(rng);
+
+    bool playerTurn = (A.stats.dex >= B.stats.dex);
+    int roundNo = 1;
+
+    std::cout << "=== Combat log ===\n";
+    while (A.curHP > 0 && B.curHP > 0) {
+        auto& att = playerTurn ? A : B;
+        auto& def = playerTurn ? B : A;
+
+        std::cout << "Round " << std::setw(2) << roundNo << " | "
+            << (playerTurn ? "HERO" : "MON ")
+            << " attacks ... ";
+
+        int hpBefore = def.curHP;
+        int dmg = engine.attack(att, def);
+
+        if (dmg == 0) {
+            std::cout << "MISS\n";
+        }
+        else {
+            std::cout << "HIT " << dmg << "  | "
+                << def.name << " HP: " << hpBefore << " -> " << def.curHP << "\n";
+        }
+
+        if (def.curHP <= 0) break;
+
+        playerTurn = !playerTurn;
+        ++roundNo;
+    }
+
+    bool win = (A.curHP > 0);
+    std::cout << "=== Result: " << (win ? "WIN" : "LOSS") << " ===\n";
     return 0;
 }

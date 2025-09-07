@@ -23,6 +23,12 @@ namespace ab {
         const ClassLevels* classes{ nullptr };
         bool isPlayer{ false };
         FighterState state{};
+
+        bool takesDoubleFromBludgeoning{ false };
+        bool immuneToSlashingWeaponBase{ false };
+        bool hasHiddenAttackLikeRogue{ false };
+        bool hasStoneSkinLikeBarbarian{ false };
+        bool hasDragonBreath{ false };
     };
 
     Combatant makePlayer(const Character& c);
