@@ -6,5 +6,5 @@ namespace ab {
 		virtual int uniform(int low, int high) = 0;
 	};
 
-	IRng& default_rng();
+	IRng& defaultRng();
 }

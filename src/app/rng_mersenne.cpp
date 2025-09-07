@@ -21,7 +21,7 @@ namespace ab {
 		std::mt19937 gen_;
 	};
 
-	IRng& default_rng() {
+	IRng& defaultRng() {
 		static RngMersenne g;
 		return g;
 	}
