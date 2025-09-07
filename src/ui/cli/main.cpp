@@ -4,6 +4,7 @@
 #include "ab/classes.hpp"
 #include "ab/monster.hpp"
 #include "ab/combat.hpp"
+#include "ab/loot.hpp"
 #include <iostream>
 #include <iomanip>
 
@@ -81,5 +82,14 @@ int main() {
 
     bool win = (A.curHP > 0);
     std::cout << "=== Result: " << (win ? "WIN" : "LOSS") << " ===\n";
+
+    if (win) {
+        if (auto reward = LootSystem::rewardFromMonster(mon)) {
+            std::cout << "Loot: " << reward->name << " (+" << reward->baseDamage << ")\n";
+            bool equipped = LootSystem::autoEquip(hero, *reward);
+            std::cout << (equipped ? "Equipped: " : "Kept current: ")
+                << hero.weapon().name << " (+" << hero.weapon().baseDamage << ")\n";
+        }
+    }
     return 0;
 }
