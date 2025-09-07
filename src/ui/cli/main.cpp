@@ -6,15 +6,15 @@
 #include <iostream>
 
 static void printSheet(const ab::Character& c) {
-    std::cout << "HP " << c.curHP << "/" << c.maxHP
-        << "  STR " << c.base.str
-        << "  DEX " << c.base.dex
-        << "  END " << c.base.endu
-        << "  Weapon=" << c.weapon.name << " (" << c.weapon.baseDamage << ")\n";
-    std::cout << "Levels: Rogue=" << c.levels.rogue
-        << " Warrior=" << c.levels.warrior
-        << " Barbarian=" << c.levels.barbarian
-        << "  total=" << c.levels.total() << "\n";
+    std::cout << "HP " << c.curHp() << "/" << c.maxHp()
+        << "  STR " << c.stats().str
+        << "  DEX " << c.stats().dex
+        << "  END " << c.stats().endu
+        << "  Weapon=" << c.weapon().name << " (" << c.weapon().baseDamage << ")\n";
+    std::cout << "Levels: Rogue=" << c.levels().rogue
+        << " Warrior=" << c.levels().warrior
+        << " Barbarian=" << c.levels().barbarian
+        << "  total=" << c.levels().total() << "\n";
 }
 
 static void printMonster(const ab::Monster& m) {
@@ -36,6 +36,11 @@ int main() {
 
 	hero.gainLevel(ab::ClassKind::Rogue);
     std::cout << "After level-up to " << ab::className(ab::ClassKind::Rogue) << "\n";
+    printSheet(hero);
+
+    hero.takeDamage(3);
+    printSheet(hero);
+    hero.healFull();
     printSheet(hero);
 
 	ab::Monster m = ab::randomMonster(rng);
