@@ -6,8 +6,10 @@
 #include "ab/combat.hpp"
 #include "ab/loot.hpp"
 #include "ab/level.hpp"
+
 #include <iostream>
 #include <iomanip>
+#include <cstdlib>
 
 static void printSheet(const ab::Character& c) {
     std::cout << "HP " << c.curHp() << "/" << c.maxHp()
@@ -30,71 +32,83 @@ static void printMonster(const ab::Monster& m) {
         << "  Weapon=" << m.weapon.name << " (" << m.weapon.baseDamage << ")\n";
 }
 
-int main() {
+static ab::Character newHero(ab::IRng& rng) {
+    ab::ClassKind start = ab::LevelSystem::chooseNextClass(rng);
+    ab::Character h = ab::Character::createNew(rng, start);
+    return h;
+}
+
+int main(int argc, char** argv) {
     setlocale(LC_ALL, "Russian");
     using namespace ab;
 
+    int targetWins = 5;
+    if (argc > 1) {
+        targetWins = std::max(1, std::atoi(argv[1]));
+    }
+
     IRng& rng = defaultRng();
 
-    Character hero = Character::createNew(rng, ClassKind::Warrior);
-    LevelSystem::grantLevel(hero, ClassKind::Rogue);
-    LevelSystem::grantLevel(hero, ClassKind::Barbarian);
-
+    Character hero = newHero(rng);
     LevelSystem::healFull(hero);
 
-    std::cout << "=== Hero sheet ===\n";
+    int streak = 0;
+    int fightNo = 1;
+
+    std::cout << "=== Campaign start: need " << targetWins << " wins in a row ===\n";
     printSheet(hero);
 
-    Monster mon = randomMonster(rng);
-    std::cout << "=== Monster spawned ===\n";
-    printMonster(mon);
+    while (streak < targetWins) {
+        std::cout << "\n=== Fight #" << fightNo << " (streak " << streak << "/" << targetWins << ") ===\n";
 
-    Combatant A = makePlayer(hero);
-    Combatant B = makeMonster(mon);
-    CombatEngine engine(rng);
+        LevelSystem::healFull(hero);
 
-    bool playerTurn = (A.stats.dex >= B.stats.dex);
-    int roundNo = 1;
+        Monster mon = randomMonster(rng);
+        std::cout << "Monster: " << mon.name
+            << " | HP " << mon.maxHP
+            << " | STR " << mon.stats.str
+            << " | DEX " << mon.stats.dex
+            << " | END " << mon.stats.endu
+            << " | Weapon " << mon.weapon.name << " (" << mon.weapon.baseDamage << ")\n";
 
-    std::cout << "=== Combat log ===\n";
-    while (A.curHP > 0 && B.curHP > 0) {
-        auto& att = playerTurn ? A : B;
-        auto& def = playerTurn ? B : A;
+        Combatant A = makePlayer(hero);
+        Combatant B = makeMonster(mon);
+        CombatEngine engine(rng);
 
-        std::cout << "Round " << std::setw(2) << roundNo << " | "
-            << (playerTurn ? "HERO" : "MON ")
-            << " attacks ... ";
+        bool win = engine.duel(A, B);
 
-        int hpBefore = def.curHP;
-        int dmg = engine.attack(att, def);
+        std::cout << "Result: " << (win ? "WIN" : "LOSS") << "\n";
 
-        if (dmg == 0) {
-            std::cout << "MISS\n";
+        if (win) {
+            ++streak;
+
+            if (auto reward = LootSystem::rewardFromMonster(mon)) {
+                bool equipped = LootSystem::autoEquip(hero, *reward);
+                std::cout << "Loot: " << reward->name << " (+" << reward->baseDamage << ") -> "
+                    << (equipped ? "equipped" : "kept current") << "\n";
+            }
+
+            if (hero.levels().total() < 3) {
+                LevelSystem::levelUpUntilTotal(hero, hero.levels().total() + 1, rng);
+                std::cout << "After level-up:\n";
+                printSheet(hero);
+            }
+
+            if (streak >= targetWins) break;
         }
         else {
-            std::cout << "HIT " << dmg << "  | "
-                << def.name << " HP: " << hpBefore << " -> " << def.curHP << "\n";
+            streak = 0;
+            std::cout << "You died. Recreating hero...\n";
+            hero = newHero(rng);
+            LevelSystem::healFull(hero);
+            printSheet(hero);
         }
 
-        if (def.curHP <= 0) break;
-        playerTurn = !playerTurn;
-        ++roundNo;
+        ++fightNo;
     }
 
-    bool win = (A.curHP > 0);
-    std::cout << "=== Result: " << (win ? "WIN" : "LOSS") << " ===\n";
-
-    if (win) {
-        if (auto reward = LootSystem::rewardFromMonster(mon)) {
-            std::cout << "Loot: " << reward->name << " (+" << reward->baseDamage << ")\n";
-            bool equipped = LootSystem::autoEquip(hero, *reward);
-            std::cout << (equipped ? "Equipped: " : "Kept current: ")
-                << hero.weapon().name << " (+" << hero.weapon().baseDamage << ")\n";
-        }
-        LevelSystem::levelUpUntilTotal(hero, 3, rng);
-        std::cout << "=== After level-ups to total 3 ===\n";
-        printSheet(hero);
-    }
+    std::cout << "\n=== Campaign result: " << (streak >= targetWins ? "VICTORY" : "DEFEAT")
+        << " (streak " << streak << "/" << targetWins << ") ===\n";
 
     return 0;
 }
