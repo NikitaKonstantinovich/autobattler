@@ -105,12 +105,14 @@ namespace ab {
         return roll <= def.stats.dex;
     }
 
-    int CombatEngine::attack(Combatant& attacker, Combatant& defender) {
+    int CombatEngine::attack(Combatant& attacker, Combatant& defender, bool* outMiss) {
         if (missCheck(attacker, defender)) {
+            if (outMiss) *outMiss = true;
             attacker.state.turnsAttacked++;
             attacker.state.firstAttackDone = true;
             return 0;
         }
+        if (outMiss) *outMiss = false;
 
         int weaponPart = baseWeapon(attacker);
         int dmg = weaponPart + baseStr(attacker);
@@ -147,13 +149,32 @@ namespace ab {
         return dmg;
     }
 
-    bool CombatEngine::duel(Combatant a, Combatant b) {
+    bool CombatEngine::duel(Combatant a, Combatant b, ICombatSink* sink) {
         bool playerTurn = (a.stats.dex >= b.stats.dex);
+        int roundNo = 1;
         while (a.curHP > 0 && b.curHP > 0) {
-            if (playerTurn) attack(a, b);
-            else            attack(b, a);
-            if (a.curHP <= 0 || b.curHP <= 0) break;
+            auto& att = playerTurn ? a : b;
+            auto& def = playerTurn ? b : a;
+
+            int hpBefore = def.curHP;
+            bool miss = false;
+            int dmg = attack(att, def, &miss);
+
+            if (sink) {
+                CombatEvent e;
+                e.roundNo = roundNo;
+                e.attacker = att.name;
+                e.defender = def.name;
+                e.dmg = dmg;
+                e.hpBefore = hpBefore;
+                e.hpAfter = def.curHP;
+                e.miss = miss;
+                sink->onRound(e);
+            }
+
+            if (def.curHP <= 0) break;
             playerTurn = !playerTurn;
+            ++roundNo;
         }
         return a.curHP > 0;
     }

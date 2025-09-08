@@ -74,4 +74,16 @@ namespace ab::ui {
         return v;
     }
 
+    void ConsoleCombatSink::onRound(const CombatEvent& e) {
+        std::cout << "Round " << (e.roundNo < 10 ? " " : "") << e.roundNo << " | "
+            << e.attacker << " attacks ... ";
+        if (e.miss) {
+            std::cout << "MISS\n";
+        }
+        else {
+            std::cout << "HIT " << e.dmg << "  | "
+                << e.defender << " HP: " << e.hpBefore << " -> " << e.hpAfter << "\n";
+        }
+    }
+
 }

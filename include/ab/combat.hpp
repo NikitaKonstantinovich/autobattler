@@ -34,11 +34,27 @@ namespace ab {
     Combatant makePlayer(const Character& c);
     Combatant makeMonster(const Monster& m);
 
+
+    struct CombatEvent {
+        int roundNo{};
+        std::string attacker;
+        std::string defender;
+        int dmg{};
+        int hpBefore{};
+        int hpAfter{};
+        bool miss{};
+    };
+
+    struct ICombatSink {
+        virtual ~ICombatSink() = default;
+        virtual void onRound(const CombatEvent& e) = 0;
+    };
+
     class CombatEngine {
     public:
         explicit CombatEngine(IRng& rng);
-        int attack(Combatant& attacker, Combatant& defender);
-        bool duel(Combatant a, Combatant b);
+        int attack(Combatant& attacker, Combatant& defender, bool* outMiss = nullptr);
+        bool duel(Combatant a, Combatant b, ICombatSink* sink);
     private:
         IRng& rng_;
         bool missCheck(const Combatant& att, const Combatant& def);

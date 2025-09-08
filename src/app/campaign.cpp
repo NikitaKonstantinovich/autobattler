@@ -33,7 +33,9 @@ namespace ab {
             Combatant A = makePlayer(hero);
             Combatant B = makeMonster(mon);
             CombatEngine engine(rng_);
-            bool win = engine.duel(A, B);
+            ui::ConsoleCombatSink sink;
+            bool win = engine.duel(A, B, &sink);
+
             std::cout << "Ðåçóëüòàò: " << (win ? "ÏÎÁÅÄÀ" : "ÏÎÐÀÆÅÍÈÅ") << "\n";
 
             if (win) {
