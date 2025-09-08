@@ -6,7 +6,7 @@ namespace ab {
     class Campaign {
     public:
         explicit Campaign(IRng& rng);
-        bool run(int targetWins);
+        bool runInteractive();
     private:
         IRng& rng_;
     };

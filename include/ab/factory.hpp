@@ -7,7 +7,7 @@ namespace ab {
 
     class HeroFactory {
     public:
-        static Character newHero(IRng& rng);
+        static Character newHero(IRng& rng, ClassKind chosen);
     };
 
 }

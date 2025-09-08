@@ -3,9 +3,8 @@
 
 namespace ab {
 
-    Character HeroFactory::newHero(IRng& rng) {
-        ClassKind start = LevelSystem::chooseNextClass(rng);
-        Character h = Character::createNew(rng, start);
+    Character HeroFactory::newHero(IRng& rng, ClassKind chosen) {
+        Character h = Character::createNew(rng, chosen);
         LevelSystem::healFull(h);
         return h;
     }

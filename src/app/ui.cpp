@@ -28,4 +28,50 @@ namespace ab::ui {
         std::cout << "=== " << title << " ===\n";
     }
 
+    static int askIntInRange(const std::string& prompt, int lo, int hi, int def = -1) {
+        for (;;) {
+            std::cout << prompt;
+            int v;
+            if (std::cin >> v) {
+                if (v >= lo && v <= hi) return v;
+            }
+            else {
+                std::cin.clear();
+            }
+            if (def >= lo && def <= hi) return def;
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Некорректный ввод. Повторите.\n";
+        }
+    }
+
+    ClassKind askClass(const std::string& title) {
+        std::cout << "\n=== " << title << " ===\n";
+        std::cout << "1) Разбойник  2) Воин  3) Варвар\n";
+        int v = askIntInRange("Выберите класс [1..3]: ", 1, 3);
+        if (v == 1) return ClassKind::Rogue;
+        if (v == 2) return ClassKind::Warrior;
+        return ClassKind::Barbarian;
+    }
+
+    bool askYesNo(const std::string& question) {
+        for (;;) {
+            std::cout << question << " [y/n]: ";
+            char c;
+            if (std::cin >> c) {
+                if (c == 'y' || c == 'Y') return true;
+                if (c == 'n' || c == 'N') return false;
+            }
+            else {
+                std::cin.clear();
+            }
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Введите y или n.\n";
+        }
+    }
+
+    int askTargetWins(int defaultWins) {
+        int v = askIntInRange("Сколько побед подряд нужно для победы? ", 1, 1000, defaultWins);
+        return v;
+    }
+
 }

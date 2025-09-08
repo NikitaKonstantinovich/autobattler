@@ -1,4 +1,6 @@
 #include "ab/loot.hpp"
+#include "ab/ui.hpp"
+#include <iostream>
 
 namespace ab {
 
@@ -19,6 +21,20 @@ namespace ab {
             hero.equip(reward);
             return true;
         }
+        return false;
+    }
+
+    bool LootSystem::promptEquip(Character& hero, const Weapon& reward) {
+        const Weapon& cur = hero.weapon();
+        std::cout << "Дроп: " << reward.name << " (+" << reward.baseDamage << ")\n";
+        std::cout << "Текущее: " << cur.name << " (+" << cur.baseDamage << ")\n";
+        bool want = ui::askYesNo("Заменить текущее оружие?");
+        if (want) {
+            hero.equip(reward);
+            std::cout << "Экипировано: " << hero.weapon().name << " (+" << hero.weapon().baseDamage << ")\n";
+            return true;
+        }
+        std::cout << "Оставлено текущее оружие.\n";
         return false;
     }
 

@@ -7,4 +7,8 @@ namespace ab::ui {
 	void printSheet(const Character& c);
 	void printMonster(const Monster& m);
 	void printHeader(const std::string& title);
+
+	ClassKind askClass(const std::string& title);
+	bool askYesNo(const std::string& question);
+	int askTargetWins(int defaultWins);
 }

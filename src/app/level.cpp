@@ -1,4 +1,6 @@
 #include "ab/level.hpp"
+#include "ab/ui.hpp"
+
 
 namespace ab {
 
@@ -22,6 +24,12 @@ namespace ab {
             ClassKind cls = chooseNextClass(rng);
             grantLevel(hero, cls);
         }
+    }
+
+    void LevelSystem::promptOneLevelUp(Character& hero) {
+        if (hero.levels().total() >= 3) return;
+        ClassKind cls = ui::askClass("Выбор класса для повышения уровня");
+        grantLevel(hero, cls);
     }
 
 }

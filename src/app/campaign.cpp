@@ -6,22 +6,24 @@
 #include "ab/monster.hpp"
 #include "ab/ui.hpp"
 #include <iostream>
-#include <algorithm>
 
 namespace ab {
 
     Campaign::Campaign(IRng& rng) : rng_(rng) {}
 
-    bool Campaign::run(int targetWins) {
+    bool Campaign::runInteractive() {
+        int targetWins = ui::askTargetWins(5);
+
         int streak = 0;
         int fightNo = 1;
 
-        Character hero = HeroFactory::newHero(rng_);
-        ui::printHeader("Campaign start");
-        ui::printSheet(hero);
+        ClassKind start = ui::askClass("Выбор стартового класса");
+        Character hero = HeroFactory::newHero(rng_, start);
+
+        std::cout << "=== Кампания началась. Нужно побед подряд: " << targetWins << " ===\n";
 
         while (streak < targetWins) {
-            ui::printHeader(std::string("Fight #") + std::to_string(fightNo) + " (streak " + std::to_string(streak) + "/" + std::to_string(targetWins) + ")");
+            std::cout << "\n=== Бой #" << fightNo << " (стрик " << streak << "/" << targetWins << ") ===\n";
 
             LevelSystem::healFull(hero);
 
@@ -32,36 +34,35 @@ namespace ab {
             Combatant B = makeMonster(mon);
             CombatEngine engine(rng_);
             bool win = engine.duel(A, B);
-            std::cout << "Result: " << (win ? "WIN" : "LOSS") << "\n";
+            std::cout << "Результат: " << (win ? "ПОБЕДА" : "ПОРАЖЕНИЕ") << "\n";
 
             if (win) {
                 ++streak;
 
+                LevelSystem::healFull(hero);
+
                 if (auto reward = LootSystem::rewardFromMonster(mon)) {
-                    bool equipped = LootSystem::autoEquip(hero, *reward);
-                    std::cout << "Loot: " << reward->name << " (+" << reward->baseDamage << ") -> "
-                        << (equipped ? "equipped" : "kept current") << "\n";
+                    LootSystem::promptEquip(hero, *reward);
                 }
 
                 if (hero.levels().total() < 3) {
-                    LevelSystem::levelUpUntilTotal(hero, hero.levels().total() + 1, rng_);
-                    ui::printHeader("After level-up");
-                    ui::printSheet(hero);
+                    LevelSystem::promptOneLevelUp(hero);
                 }
 
                 if (streak >= targetWins) break;
             }
             else {
                 streak = 0;
-                std::cout << "You died. Recreating hero...\n\n";
-                hero = HeroFactory::newHero(rng_);
-                ui::printSheet(hero);
+                std::cout << "Вы погибли. Создаём нового героя...\n";
+                ClassKind s2 = ui::askClass("Выбор стартового класса");
+                hero = HeroFactory::newHero(rng_, s2);
             }
 
             ++fightNo;
         }
 
-        ui::printHeader(std::string("Campaign result: ") + (streak >= targetWins ? "VICTORY" : "DEFEAT"));
+        std::cout << "\n=== Итог кампании: " << (streak >= targetWins ? "ПОБЕДА" : "ПРОВАЛ")
+            << " (стрик " << streak << "/" << targetWins << ") ===\n";
         return streak >= targetWins;
     }
 

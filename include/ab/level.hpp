@@ -11,6 +11,7 @@ namespace ab {
         static void grantLevel(Character& hero, ClassKind cls);
         static ClassKind chooseNextClass(IRng& rng);
         static void levelUpUntilTotal(Character& hero, int targetTotal, IRng& rng);
+        static void promptOneLevelUp(Character& hero);
     };
 
 }
